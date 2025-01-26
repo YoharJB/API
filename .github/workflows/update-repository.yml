@@ -87,6 +87,9 @@ jobs:
             fi
           done
 
+          # Eliminar el archivo .json en ./API
+          find ./API -maxdepth 1 -name '*.json' -exec rm -f {} \;
+
       # Hacer commit de los cambios de limpieza en API
       - name: Commit cambios de limpieza
         run: |
