@@ -1,11 +1,11 @@
 name: Mover archivos a API
 
 on:
+  workflow_dispatch:
   pull_request:
+    types: [closed]
     branches:
       - main
-
-  workflow_dispatch:
 
 jobs:
   move-to-api-repo:
@@ -33,33 +33,50 @@ jobs:
         run: |
           # Usar rsync para mover y actualizar todos los archivos
           rsync -av ./API/Addons/ ./API-RAW/API/Addons/
+          rsync -av ./API/ElvUI/ ./API-RAW/API/ElvUI/
+          rsync -av ./API/WeakAuras/ ./API-RAW/API/WeakAuras/
 
-      # Combinar contenido de JSONs
-      # Combinar contenido de JSONs
-      - name: Combinar JSONs
+      # Clasificar y combinar JSONs
+      - name: Clasificar y combinar JSONs
         run: |
-          # Directorio y archivo JSON del destino
+          # Rutas de los archivos JSON de destino
           DEST_MADDONS_JSON="./API-RAW/API/Maddons.json"
+          DEST_ELVUI_JSON="./API-RAW/API/ElvUI.json"
+          DEST_WEAKAURAS_JSON="./API-RAW/API/WeakAuras.json"
 
-          # Crear un archivo temporal para combinar todos los JSONs
-          TEMP_JSON="./temp_combined.json"
-          echo "[]" > "$TEMP_JSON"
+          # Crear archivos temporales para combinar
+          TEMP_MADDONS_JSON="./temp_maddons_combined.json"
+          TEMP_ELVUI_JSON="./temp_elvui_combined.json"
+          TEMP_WEAKAURAS_JSON="./temp_wa_combined.json"
 
-          # Combinar todos los archivos JSON de la carpeta API
-          find ./API -maxdepth 1 -name '*.json' | while read USER_JSON; do
-            echo "Procesando JSON del usuario: $USER_JSON"
-            jq -s '.[0] + .[1]' "$TEMP_JSON" "$USER_JSON" > "./temp_combined_updated.json"
-            mv "./temp_combined_updated.json" "$TEMP_JSON"
+          # Inicializar los archivos temporales como arrays vacíos
+          echo "[]" > "$TEMP_MADDONS_JSON"
+          echo "[]" > "$TEMP_ELVUI_JSON"
+          echo "[]" > "$TEMP_WEAKAURAS_JSON"
+
+          # Procesar todos los JSONs en la carpeta API
+          find ./API -name '*.json' | while read USER_JSON; do
+            if [[ "$USER_JSON" == *"/Addons/"* ]]; then
+              echo "Agregando $USER_JSON a Maddons.json"
+              jq -s '.[0] + .[1]' "$TEMP_MADDONS_JSON" "$USER_JSON" > ./temp.json && mv ./temp.json "$TEMP_MADDONS_JSON"
+            elif [[ "$USER_JSON" == *"/ElvUI/"* ]]; then
+              echo "Agregando $USER_JSON a ElvUI.json"
+              jq -s '.[0] + .[1]' "$TEMP_ELVUI_JSON" "$USER_JSON" > ./temp.json && mv ./temp.json "$TEMP_ELVUI_JSON"
+            elif [[ "$USER_JSON" == *"/WeakAuras/"* ]]; then
+              echo "Agregando $USER_JSON a WeakAuras.json"
+              jq -s '.[0] + .[1]' "$TEMP_WEAKAURAS_JSON" "$USER_JSON" > ./temp.json && mv ./temp.json "$TEMP_WEAKAURAS_JSON"
+            else
+              echo "Archivo $USER_JSON no pertenece a ninguna categoría conocida. Ignorando."
+            fi
           done
 
-          # Combinar el archivo temporal con el JSON destino
-          jq -s '.[0] + .[1]' "$DEST_MADDONS_JSON" "$TEMP_JSON" > ./API-RAW/API/Maddons_updated.json
+          # Combinar los archivos temporales con los JSON existentes en API-RAW
+          jq -s '.[0] + .[1]' "$DEST_MADDONS_JSON" "$TEMP_MADDONS_JSON" > ./API-RAW/API/Maddons_updated.json && mv ./API-RAW/API/Maddons_updated.json "$DEST_MADDONS_JSON"
+          jq -s '.[0] + .[1]' "$DEST_ELVUI_JSON" "$TEMP_ELVUI_JSON" > ./API-RAW/API/ElvUI_updated.json && mv ./API-RAW/API/ElvUI_updated.json "$DEST_ELVUI_JSON"
+          jq -s '.[0] + .[1]' "$DEST_WEAKAURAS_JSON" "$TEMP_WEAKAURAS_JSON" > ./API-RAW/API/WeakAuras_updated.json && mv ./API-RAW/API/WeakAuras_updated.json "$DEST_WEAKAURAS_JSON"
 
-          # Reemplazar el archivo Maddons.json original
-          mv ./API-RAW/API/Maddons_updated.json "$DEST_MADDONS_JSON"
-
-          # Eliminar el archivo temporal
-          rm -f "$TEMP_JSON"
+          # Limpiar archivos temporales
+          rm -f "$TEMP_MADDONS_JSON" "$TEMP_ELVUI_JSON" "$TEMP_WEAKAURAS_JSON"
 
       # Commit de los cambios en el repositorio de API-RAW
       - name: Commit y push cambios
@@ -76,24 +93,19 @@ jobs:
       # Eliminar archivos procesados en API
       - name: Eliminar archivos procesados
         run: |
-          # Directorios específicos a limpiar
+          # Limpiar carpetas específicas
           TARGET_DIRS=(
-            "./API/Addons/Lichking"
-            "./API/Addons/Cataclysm"
-            "./API/Addons/Pandaria"
-            "./API/Addons/Vanilla"
-            "./API/Addons/TBC"
+            "./API/Addons"
+            "./API/ElvUI"
+            "./API/WeakAuras"
           )
-      
-          # Limpiar contenido de las carpetas objetivo, eliminando solo los archivos con las extensiones indicadas
+
+          # Eliminar archivos específicos en las carpetas objetivo
           for DIR in "${TARGET_DIRS[@]}"; do
             if [ -d "$DIR" ]; then
               find "$DIR" -type f \( -iname "*.webp" -o -iname "*.zip" -o -iname "*.md" -o -iname "*.json" \) -exec rm -f {} \;
             fi
           done
-
-          # Eliminar el archivo .json en ./API
-          find ./API -maxdepth 1 -name '*.json' -exec rm -f {} \;
 
       # Hacer commit de los cambios de limpieza en API
       - name: Commit cambios de limpieza
