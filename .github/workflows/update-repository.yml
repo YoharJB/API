@@ -80,19 +80,26 @@ jobs:
             "./API/Addons/TBC"
           )
       
-          # Limpiar contenido de las carpetas objetivo
+          # Extensiones de archivo a eliminar
+          FILE_EXTENSIONS="*.webp *.zip *.md *.json"
+      
+          # Limpiar archivos con las extensiones especificadas en las carpetas objetivo
           for DIR in "${TARGET_DIRS[@]}"; do
             if [ -d "$DIR" ]; then
-              echo "Eliminando contenido de $DIR"
-              rm -rf "$DIR"/*
+              for EXT in $FILE_EXTENSIONS; do
+                echo "Eliminando archivos $EXT en $DIR"
+                find "$DIR" -type f -name "$EXT" -exec rm -v {} \;
+              done
             else
               echo "Directorio $DIR no encontrado, omitiendo."
             fi
           done
       
-          # Eliminar cualquier archivo .json en ./API
-          echo "Eliminando archivos .json en ./API"
-          find ./API -maxdepth 1 -name '*.json' -exec rm -v {} \;
+          # También eliminar archivos con las extensiones en ./API
+          echo "Eliminando archivos específicos en ./API"
+          for EXT in $FILE_EXTENSIONS; do
+            find ./API -maxdepth 1 -type f -name "$EXT" -exec rm -v {} \;
+          done
 
       # Commit y push cambios tras eliminar archivos
       - name: Commit y push eliminación
