@@ -80,34 +80,16 @@ jobs:
             "./API/Addons/TBC"
           )
       
-          # Extensiones de archivo a eliminar
-          FILE_EXTENSIONS="*.webp *.zip *.md *.json"
-      
-          # Limpiar archivos con las extensiones especificadas en las carpetas objetivo
+          # Limpiar contenido de las carpetas objetivo, eliminando solo los archivos con las extensiones indicadas
           for DIR in "${TARGET_DIRS[@]}"; do
             if [ -d "$DIR" ]; then
-              for EXT in $FILE_EXTENSIONS; do
-                echo "Eliminando archivos $EXT en $DIR"
-                find "$DIR" -type f -name "$EXT" -exec rm -v {} \;
-              done
-            else
-              echo "Directorio $DIR no encontrado, omitiendo."
+              find "$DIR" -type f \( -iname "*.webp" -o -iname "*.zip" -o -iname "*.md" -o -iname "*.json" \) -exec rm -f {} \;
             fi
           done
-      
-          # También eliminar archivos con las extensiones en ./API
-          echo "Eliminando archivos específicos en ./API"
-          for EXT in $FILE_EXTENSIONS; do
-            find ./API -maxdepth 1 -type f -name "$EXT" -exec rm -v {} \;
-          done
 
-      # Commit y push cambios tras eliminar archivos
-      - name: Commit y push eliminación
+      # Hacer commit de los cambios de limpieza en API
+      - name: Commit cambios de limpieza
         run: |
-          git config --global user.email "actions@github.com"
-          git config --global user.name "GitHub Actions"
-          git add ./API
-          git commit -m "Eliminación de archivos procesados en ./API"
+          git add .
+          git commit -m "Limpiar archivos procesados en API"
           git push
-        env:
-          GITHUB_TOKEN: ${{ secrets.BOT }}
