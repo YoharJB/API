@@ -35,25 +35,26 @@ jobs:
           rsync -av ./API/Addons/ ./API-RAW/API/Addons/
 
       # Combinar contenido de JSONs
-      - name: Combinar JSONs
+      - name: Actualizar Maddons.json
         run: |
-          # Directorio y archivo JSON del destino
+          # Definir rutas de los archivos
           DEST_MADDONS_JSON="./API-RAW/API/Maddons.json"
+          TEMP_MADDONS_JSON="./API-RAW/API/Maddons_temp.json"
           
-          # Archivo JSON del usuario (asume que hay un único archivo *.json en ./API)
+          # Buscar JSON subido por el usuario en el repo API
           USER_JSON=$(find ./API -maxdepth 1 -name '*.json' -print -quit)
 
-          # Si no existe un JSON del usuario, no se hace nada
+          # Si no se subió un JSON, no hacemos nada
           if [ -f "$USER_JSON" ]; then
-            echo "Procesando JSON del usuario: $USER_JSON"
+            echo "Procesando archivo JSON del usuario: $USER_JSON"
+
+            # Combinar el JSON subido con el Maddons.json existente
+            jq -s '.[0] + .[1]' "$DEST_MADDONS_JSON" "$USER_JSON" > "$TEMP_MADDONS_JSON"
             
-            # Combinar el JSON del usuario con el JSON existente en API-RAW
-            jq -s '.[0] + .[1]' "$DEST_MADDONS_JSON" "$USER_JSON" > ./API-RAW/API/Maddons_updated.json
-            
-            # Reemplazar el archivo Maddons.json original
-            mv ./API-RAW/API/Maddons_updated.json "$DEST_MADDONS_JSON"
+            # Reemplazar el Maddons.json original con el combinado
+            mv "$TEMP_MADDONS_JSON" "$DEST_MADDONS_JSON"
           else
-            echo "No se encontró un JSON del usuario en API."
+            echo "No se encontró un archivo JSON en API, Maddons.json permanece sin cambios."
           fi
 
       # Commit de los cambios en el repositorio de API-RAW
