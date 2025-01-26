@@ -90,6 +90,8 @@ jobs:
       # Hacer commit de los cambios de limpieza en API
       - name: Commit cambios de limpieza
         run: |
+          git config user.email "actions@github.com"
+          git config user.name "GitHub Actions"
           git add .
           git commit -m "Limpiar archivos procesados en API"
           git push
