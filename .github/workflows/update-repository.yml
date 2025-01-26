@@ -1,11 +1,11 @@
 name: Mover archivos a API
 
 on:
-  workflow_dispatch:
   pull_request:
-    types: [closed]
     branches:
       - main
+
+  workflow_dispatch:
 
 jobs:
   move-to-api-repo:
@@ -35,26 +35,31 @@ jobs:
           rsync -av ./API/Addons/ ./API-RAW/API/Addons/
 
       # Combinar contenido de JSONs
+      # Combinar contenido de JSONs
       - name: Combinar JSONs
         run: |
           # Directorio y archivo JSON del destino
           DEST_MADDONS_JSON="./API-RAW/API/Maddons.json"
-          
-          # Archivo JSON del usuario (asume que hay un único archivo *.json en ./API)
-          USER_JSON=$(find ./API -maxdepth 1 -name '*.json' -print -quit)
 
-          # Si no existe un JSON del usuario, no se hace nada
-          if [ -f "$USER_JSON" ]; then
+          # Crear un archivo temporal para combinar todos los JSONs
+          TEMP_JSON="./temp_combined.json"
+          echo "[]" > "$TEMP_JSON"
+
+          # Combinar todos los archivos JSON de la carpeta API
+          find ./API -maxdepth 1 -name '*.json' | while read USER_JSON; do
             echo "Procesando JSON del usuario: $USER_JSON"
-            
-            # Combinar el JSON del usuario con el JSON existente en API-RAW
-            jq -s '.[0] + .[1]' "$DEST_MADDONS_JSON" "$USER_JSON" > ./API-RAW/API/Maddons_updated.json
-            
-            # Reemplazar el archivo Maddons.json original
-            mv ./API-RAW/API/Maddons_updated.json "$DEST_MADDONS_JSON"
-          else
-            echo "No se encontró un JSON del usuario en API."
-          fi
+            jq -s '.[0] + .[1]' "$TEMP_JSON" "$USER_JSON" > "./temp_combined_updated.json"
+            mv "./temp_combined_updated.json" "$TEMP_JSON"
+          done
+
+          # Combinar el archivo temporal con el JSON destino
+          jq -s '.[0] + .[1]' "$DEST_MADDONS_JSON" "$TEMP_JSON" > ./API-RAW/API/Maddons_updated.json
+
+          # Reemplazar el archivo Maddons.json original
+          mv ./API-RAW/API/Maddons_updated.json "$DEST_MADDONS_JSON"
+
+          # Eliminar el archivo temporal
+          rm -f "$TEMP_JSON"
 
       # Commit de los cambios en el repositorio de API-RAW
       - name: Commit y push cambios
