@@ -28,14 +28,35 @@ jobs:
           path: API-RAW
           ref: main
 
-      # Mover los archivos y actualizar el JSON
-      - name: Mover archivos y actualizar JSON
+      # Mover los archivos
+      - name: Mover archivos
         run: |
-          # Usar rsync para mover archivos, evitando sobrescribir si ya existen
-          rsync -av --ignore-existing ./API/Addons/ ./API-RAW/API/Addons/
-          rsync -av ./API/Maddons.json ./API-RAW/API/Maddons.json
+          # Usar rsync para mover y actualizar todos los archivos
+          rsync -av ./API/Addons/ ./API-RAW/API/Addons/
 
-      # Commit de los cambios en el repositorio de API
+      # Combinar contenido de JSONs
+      - name: Combinar JSONs
+        run: |
+          # Directorio y archivo JSON del destino
+          DEST_MADDONS_JSON="./API-RAW/API/Maddons.json"
+          
+          # Archivo JSON del usuario (asume que hay un único archivo *.json en ./API)
+          USER_JSON=$(find ./API -maxdepth 1 -name '*.json' -print -quit)
+
+          # Si no existe un JSON del usuario, no se hace nada
+          if [ -f "$USER_JSON" ]; then
+            echo "Procesando JSON del usuario: $USER_JSON"
+            
+            # Combinar el JSON del usuario con el JSON existente en API-RAW
+            jq -s '.[0] + .[1]' "$DEST_MADDONS_JSON" "$USER_JSON" > ./API-RAW/API/Maddons_updated.json
+            
+            # Reemplazar el archivo Maddons.json original
+            mv ./API-RAW/API/Maddons_updated.json "$DEST_MADDONS_JSON"
+          else
+            echo "No se encontró un JSON del usuario en API."
+          fi
+
+      # Commit de los cambios en el repositorio de API-RAW
       - name: Commit y push cambios
         uses: cpina/github-action-push-to-another-repository@main
         with:
@@ -46,3 +67,14 @@ jobs:
           user-name: "GitHub Actions"
         env:
           API_TOKEN_GITHUB: ${{ secrets.BOT }}
+
+      # Eliminar archivos procesados en API
+      - name: Eliminar archivos procesados
+        run: |
+          # Eliminar archivos y directorios procesados en API
+          rm -rf ./API/Addons/Lichking/*
+          rm -rf ./API/Addons/Cataclysm/*
+          rm -rf ./API/Addons/Pandaria/*
+          rm -rf ./API/Addons/Vanilla/*
+          rm -rf ./API/Addons/TBC/*
+          find ./API -maxdepth 1 -name '*.json' -delete
