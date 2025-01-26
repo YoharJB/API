@@ -31,10 +31,10 @@ jobs:
       # Mover los archivos
       - name: Mover archivos
         run: |
-          # Usar rsync para mover y actualizar todos los archivos
-          rsync -av ./API/Addons/ ./API-RAW/API/Addons/
-          rsync -av ./API/ElvUI/ ./API-RAW/API/ElvUI/
-          rsync -av ./API/WeakAuras/ ./API-RAW/API/WeakAuras/
+          # Usar rsync para mover y actualizar todos los archivos, excluyendo los archivos .json
+          rsync -av --exclude='*.json' ./API/Addons/ ./API-RAW/API/Addons/
+          rsync -av --exclude='*.json' ./API/ElvUI/ ./API-RAW/API/ElvUI/
+          rsync -av --exclude='*.json' ./API/WeakAuras/ ./API-RAW/API/WeakAuras/
 
       # Clasificar y combinar JSONs
       - name: Clasificar y combinar JSONs
