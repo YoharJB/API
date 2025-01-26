@@ -1,7 +1,8 @@
-name: Mover archivos a API
+name: Move to API repo
 
 on:
   pull_request:
+    types: [closed]
     branches:
       - main
       
@@ -11,7 +12,7 @@ jobs:
   move-to-api-repo:
     runs-on: ubuntu-latest
     steps:
-      # Chequear el código del repositorio principal
+      # Check main code.
       - name: Checkout principal repo
         uses: actions/checkout@v4
         with:
@@ -19,42 +20,38 @@ jobs:
           token: ${{ secrets.BOT }}
           ref: main
 
-      # Chequear el código del repositorio de API
+      # Check main API Code
       - name: Checkout repo API-RAW
         uses: actions/checkout@v4
         with:
           repository: YoharJB/API-RAW
           token: ${{ secrets.BOT }}
           path: API-RAW
-          ref: main
+          ref: develop
 
-      # Mover los archivos
-      - name: Mover archivos
+      # Move files to API repo
+      - name: Move files to API repo
         run: |
           # Usar rsync para mover y actualizar todos los archivos, excluyendo los archivos .json
           rsync -av --exclude='*.json' ./API/Addons/ ./API-RAW/API/Addons/
           rsync -av --exclude='*.json' ./API/ElvUI/ ./API-RAW/API/ElvUI/
           rsync -av --exclude='*.json' ./API/WeakAuras/ ./API-RAW/API/WeakAuras/
 
-      # Clasificar y combinar JSONs
-      - name: Clasificar y combinar JSONs
+      # Combine json 
+      - name: Combine json 
         run: |
-          # Rutas de los archivos JSON de destino
           DEST_MADDONS_JSON="./API-RAW/API/Maddons.json"
           DEST_ELVUI_JSON="./API-RAW/API/ElvUI.json"
           DEST_WEAKAURAS_JSON="./API-RAW/API/WeakAuras.json"
 
-          # Crear archivos temporales para combinar
           TEMP_MADDONS_JSON="./temp_maddons_combined.json"
           TEMP_ELVUI_JSON="./temp_elvui_combined.json"
           TEMP_WEAKAURAS_JSON="./temp_wa_combined.json"
 
-          # Inicializar los archivos temporales como arrays vacíos
           echo "[]" > "$TEMP_MADDONS_JSON"
           echo "[]" > "$TEMP_ELVUI_JSON"
           echo "[]" > "$TEMP_WEAKAURAS_JSON"
 
-          # Procesar todos los JSONs en la carpeta API
           find ./API -name '*.json' | while read USER_JSON; do
             if [[ "$USER_JSON" == *"/Addons/"* ]]; then
               echo "Agregando $USER_JSON a Maddons.json"
@@ -70,16 +67,14 @@ jobs:
             fi
           done
 
-          # Combinar los archivos temporales con los JSON existentes en API-RAW
           jq -s '.[0] + .[1]' "$DEST_MADDONS_JSON" "$TEMP_MADDONS_JSON" > ./API-RAW/API/Maddons_updated.json && mv ./API-RAW/API/Maddons_updated.json "$DEST_MADDONS_JSON"
           jq -s '.[0] + .[1]' "$DEST_ELVUI_JSON" "$TEMP_ELVUI_JSON" > ./API-RAW/API/ElvUI_updated.json && mv ./API-RAW/API/ElvUI_updated.json "$DEST_ELVUI_JSON"
           jq -s '.[0] + .[1]' "$DEST_WEAKAURAS_JSON" "$TEMP_WEAKAURAS_JSON" > ./API-RAW/API/WeakAuras_updated.json && mv ./API-RAW/API/WeakAuras_updated.json "$DEST_WEAKAURAS_JSON"
 
-          # Limpiar archivos temporales
           rm -f "$TEMP_MADDONS_JSON" "$TEMP_ELVUI_JSON" "$TEMP_WEAKAURAS_JSON"
 
-      # Commit de los cambios en el repositorio de API-RAW
-      - name: Commit y push cambios
+      # Commit changes on API repo
+      - name: Commit changes on API repo
         uses: cpina/github-action-push-to-another-repository@main
         with:
           source-directory: "API-RAW"
@@ -90,28 +85,26 @@ jobs:
         env:
           API_TOKEN_GITHUB: ${{ secrets.BOT }}
 
-      # Eliminar archivos procesados en API
-      - name: Eliminar archivos procesados
+      # Clean Main repo a ready to use again.
+      - name: Clean Main repo a ready to use again.
         run: |
-          # Limpiar carpetas específicas
           TARGET_DIRS=(
             "./API/Addons"
             "./API/ElvUI"
             "./API/WeakAuras"
           )
 
-          # Eliminar archivos específicos en las carpetas objetivo
           for DIR in "${TARGET_DIRS[@]}"; do
             if [ -d "$DIR" ]; then
               find "$DIR" -type f \( -iname "*.webp" -o -iname "*.zip" -o -iname "*.md" -o -iname "*.json" \) -exec rm -f {} \;
             fi
           done
 
-      # Hacer commit de los cambios de limpieza en API
-      - name: Commit cambios de limpieza
+      # Push change to MAIN repo
+      - name: Push change to MAIN repo
         run: |
           git config user.email "actions@github.com"
           git config user.name "GitHub Actions"
           git add .
-          git commit -m "Limpiar archivos procesados en API"
+          git commit -m "Clean main repo"
           git push
