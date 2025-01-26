@@ -104,3 +104,11 @@ jobs:
           done
           echo "Archivos JSON restantes en ./API:"
           find ./API -maxdepth 1 -name '*.json'
+
+      - name: Commit y push cambios en API
+        run: |
+          git config --global user.email "actions@github.com"
+          git config --global user.name "GitHub Actions"
+          git add -A
+          git commit -m "Pushed to API repo and Clean Folders."
+          git push
