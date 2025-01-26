@@ -1,4 +1,4 @@
-name: Mover archivos modificados a API
+name: Mover archivos a API
 
 on:
   pull_request:
@@ -18,7 +18,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           ref: main
 
-      # Chequear el código del repositorio API-RAW
+      # Chequear el código del repositorio de API
       - name: Checkout repo API-RAW
         uses: actions/checkout@v3
         with:
@@ -27,30 +27,19 @@ jobs:
           path: API-RAW
           ref: main
 
-      # Obtener los archivos modificados de la PR
-      - name: Obtener archivos modificados
+      # Mover los archivos y actualizar el JSON
+      - name: Mover archivos y actualizar JSON
         run: |
-          # Listar los archivos modificados en la PR
-          git diff --name-only ${{ github.event.before }} ${{ github.sha }} > changed_files.txt
-          echo "Archivos modificados: $(cat changed_files.txt)"
+          # Usar rsync para mover archivos, evitando sobrescribir si ya existen
+          rsync -av --ignore-existing ./API/Addons/ ./API-RAW/API/Addons/
+          rsync -av ./API/Maddons.json ./API-RAW/API/Maddons.json
 
-      # Mover los archivos modificados al repositorio API-RAW
-      - name: Mover archivos modificados
-        run: |
-          # Leer cada archivo de la lista de cambios y moverlo
-          while IFS= read -r file; do
-            # Mover los archivos modificados desde el repositorio principal a API-RAW
-            if [[ "$file" == API/Addons/* ]]; then
-              mv "./$file" "./API-RAW/$file"
-            fi
-          done < changed_files.txt
-
-      # Commit de los cambios en el repositorio de API-RAW
+      # Commit de los cambios en el repositorio de API
       - name: Commit y push cambios
         run: |
           cd API-RAW
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
           git add .
-          git commit -m "Mover archivos modificados desde la PR"
+          git commit -m "Github Action Automatizacion"
           git push origin main
