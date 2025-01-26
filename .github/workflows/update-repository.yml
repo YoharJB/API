@@ -35,26 +35,25 @@ jobs:
           rsync -av ./API/Addons/ ./API-RAW/API/Addons/
 
       # Combinar contenido de JSONs
-      - name: Actualizar Maddons.json
+      - name: Combinar JSONs
         run: |
-          # Definir rutas de los archivos
+          # Directorio y archivo JSON del destino
           DEST_MADDONS_JSON="./API-RAW/API/Maddons.json"
-          TEMP_MADDONS_JSON="./API-RAW/API/Maddons_temp.json"
           
-          # Buscar JSON subido por el usuario en el repo API
+          # Archivo JSON del usuario (asume que hay un único archivo *.json en ./API)
           USER_JSON=$(find ./API -maxdepth 1 -name '*.json' -print -quit)
 
-          # Si no se subió un JSON, no hacemos nada
+          # Si no existe un JSON del usuario, no se hace nada
           if [ -f "$USER_JSON" ]; then
-            echo "Procesando archivo JSON del usuario: $USER_JSON"
-
-            # Combinar el JSON subido con el Maddons.json existente
-            jq -s '.[0] + .[1]' "$DEST_MADDONS_JSON" "$USER_JSON" > "$TEMP_MADDONS_JSON"
+            echo "Procesando JSON del usuario: $USER_JSON"
             
-            # Reemplazar el Maddons.json original con el combinado
-            mv "$TEMP_MADDONS_JSON" "$DEST_MADDONS_JSON"
+            # Combinar el JSON del usuario con el JSON existente en API-RAW
+            jq -s '.[0] + .[1]' "$DEST_MADDONS_JSON" "$USER_JSON" > ./API-RAW/API/Maddons_updated.json
+            
+            # Reemplazar el archivo Maddons.json original
+            mv ./API-RAW/API/Maddons_updated.json "$DEST_MADDONS_JSON"
           else
-            echo "No se encontró un archivo JSON en API, Maddons.json permanece sin cambios."
+            echo "No se encontró un JSON del usuario en API."
           fi
 
       # Commit de los cambios en el repositorio de API-RAW
@@ -73,9 +72,5 @@ jobs:
       - name: Eliminar archivos procesados
         run: |
           # Eliminar archivos y directorios procesados en API
-          rm -rf ./API/Addons/Lichking/*
-          rm -rf ./API/Addons/Cataclysm/*
-          rm -rf ./API/Addons/Pandaria/*
-          rm -rf ./API/Addons/Vanilla/*
-          rm -rf ./API/Addons/TBC/*
+          rm -rf ./API/Addons/*
           find ./API -maxdepth 1 -name '*.json' -delete
