@@ -71,6 +71,21 @@ jobs:
       # Eliminar archivos procesados en API
       - name: Eliminar archivos procesados
         run: |
-          # Eliminar archivos y directorios procesados en API
-          rm -rf ./API/Addons/*
+          # Directorios específicos a limpiar
+          TARGET_DIRS=(
+            "./API/Addons/Lichking"
+            "./API/Addons/Cataclysm"
+            "./API/Addons/Pandaria"
+            "./API/Addons/Vanilla"
+            "./API/Addons/TBC"
+          )
+      
+          # Limpiar contenido de las carpetas objetivo
+          for DIR in "${TARGET_DIRS[@]}"; do
+            if [ -d "$DIR" ]; then
+              rm -rf "$DIR"/*
+            fi
+          done
+      
+          # Eliminar cualquier archivo .json en ./API
           find ./API -maxdepth 1 -name '*.json' -delete
