@@ -69,6 +69,7 @@ jobs:
           API_TOKEN_GITHUB: ${{ secrets.BOT }}
 
       # Eliminar archivos procesados en API
+      # Eliminar archivos procesados en API
       - name: Eliminar archivos procesados
         run: |
           # Directorios específicos a limpiar
@@ -83,9 +84,23 @@ jobs:
           # Limpiar contenido de las carpetas objetivo
           for DIR in "${TARGET_DIRS[@]}"; do
             if [ -d "$DIR" ]; then
+              echo "Eliminando contenido de $DIR"
               rm -rf "$DIR"/*
+            else
+              echo "Directorio $DIR no encontrado, omitiendo."
             fi
           done
       
           # Eliminar cualquier archivo .json en ./API
-          find ./API -maxdepth 1 -name '*.json' -delete
+          echo "Eliminando archivos .json en ./API"
+          find ./API -maxdepth 1 -name '*.json' -exec rm -v {} \;
+
+          # Confirmar que los archivos han sido eliminados
+          echo "Archivos restantes en Addons:"
+          for DIR in "${TARGET_DIRS[@]}"; do
+            if [ -d "$DIR" ]; then
+              ls -la "$DIR"
+            fi
+          done
+          echo "Archivos JSON restantes en ./API:"
+          find ./API -maxdepth 1 -name '*.json'
