@@ -1,11 +1,11 @@
 name: Mover archivos a API
 
 on:
-  workflow_dispatch:
   pull_request:
-    types: [closed]
     branches:
       - main
+      
+  workflow_dispatch:
 
 jobs:
   move-to-api-repo:
