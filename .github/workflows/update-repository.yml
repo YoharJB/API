@@ -1,0 +1,46 @@
+name: Mover archivos a API
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - main
+
+jobs:
+  move-to-api-repo:
+    runs-on: ubuntu-latest
+    steps:
+      # Chequear el código del repositorio principal
+      - name: Checkout principal repo
+        uses: actions/checkout@v3
+        with:
+          repository: YoharJB/API
+          token: ${{ secrets.GITHUB_TOKEN }}
+          ref: main
+
+      # Chequear el código del repositorio de API
+      - name: Checkout repo API-RAW
+        uses: actions/checkout@v3
+        with:
+          repository: YoharJB/API-RAW
+          token: ${{ secrets.GITHUB_TOKEN }}
+          path: API-RAW
+          ref: main
+
+      # Mover los archivos y actualizar el JSON
+      - name: Mover archivos y actualizar JSON
+        run: |
+          # Mover los addons
+          mv ./API/Addons/* ./API-RAW/API/Addons/
+          # Mover el archivo JSON
+          mv ./API/Maddons.json ./API-RAW/API/Maddons.json
+
+      # Commit de los cambios en el repositorio de API
+      - name: Commit y push cambios
+        run: |
+          cd API-RAW
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add .
+          git commit -m "Github Action Automatizacion"
+          git push origin main
