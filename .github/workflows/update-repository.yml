@@ -15,7 +15,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: YoharJB/API
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.BOT }}
           ref: main
 
       # Chequear el código del repositorio de API
@@ -23,7 +23,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: YoharJB/API-RAW
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.BOT }}
           path: API-RAW
           ref: main
 
