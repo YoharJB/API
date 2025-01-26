@@ -27,7 +27,7 @@ jobs:
           repository: YoharJB/API-RAW
           token: ${{ secrets.BOT }}
           path: API-RAW
-          ref: develop
+          ref: main
 
       # Move files to API repo
       - name: Move files to API repo
