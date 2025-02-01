@@ -1,0 +1,21 @@
+{
+  "title": "List",
+  "file_name": "List",
+  "description": "List",
+  "author": "List",
+  "pr_author": "<@284896471210393600>",
+  "avatar_pr_author": "List",
+  "expansion": "Vanilla",
+  "roles": [
+    "TANK",
+    "DPS",
+    "HEALER"
+  ],
+  "class": [
+    "Mage",
+    "Warrior",
+    "Monk",
+    "Shaman",
+    "Priest"
+  ]
+}
