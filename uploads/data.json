@@ -1,0 +1,21 @@
+{
+  "title": "Ackis Recipe List",
+  "file_name": "¿Cuál es el nombre del archivo?",
+  "description": "Ackis Recipe List",
+  "author": "Sitoz",
+  "pr_author": "Sitoz",
+  "avatar_pr_author": "asd",
+  "expansion": [
+    "Cataclysm"
+  ],
+  "tags": [
+    "PvE"
+  ],
+  "roles": [
+    "DPS",
+    " TANK"
+  ],
+  "class": [
+    "¿Qué clases tiene el addon? (Ej. All)"
+  ]
+}
