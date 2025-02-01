@@ -1,0 +1,22 @@
+{
+  "title": "Ackis Recipe List",
+  "file_name": "Ackis Recipe List",
+  "description": "Ackis Recipe List",
+  "author": "Sitoz",
+  "pr_author": "Sitoz",
+  "avatar_pr_author": "https",
+  "expansion": [
+    "Lichking"
+  ],
+  "tags": [
+    "PvE"
+  ],
+  "roles": [
+    "¿Qué roles tiene el addon? (Ej. DPS",
+    "TANK",
+    "HEALER)"
+  ],
+  "class": [
+    "¿Qué clases tiene el addon? (Ej. All)"
+  ]
+}
