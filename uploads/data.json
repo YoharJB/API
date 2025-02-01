@@ -1,0 +1,21 @@
+{
+  "title": "Ackis Recipe List",
+  "file_name": "Ackis Recipe List",
+  "description": "Ackis Recipe List",
+  "author": "sitoz",
+  "pr_author": "sitoz",
+  "avatar_pr_author": "https",
+  "expansion": [
+    "Cataclysm"
+  ],
+  "tags": [
+    "PvE"
+  ],
+  "roles": [
+    "DPS",
+    "HEALER"
+  ],
+  "class": [
+    "Rogue"
+  ]
+}
