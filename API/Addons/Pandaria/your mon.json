@@ -1,0 +1,24 @@
+{
+  "title": "your moon",
+  "file_name": "your mon",
+  "description": "my mon",
+  "author": "Sitoz",
+  "pr_author": "sitoz",
+  "avatar_pr_author": "/avatars/default.webp",
+  "expansion": [
+    "Pandaria"
+  ],
+  "tags": [
+    "PvE",
+    "Achievements",
+    "Data Export",
+    "Companions",
+    "Unit Frames"
+  ],
+  "roles": [
+    "All"
+  ],
+  "class": [
+    "All"
+  ]
+}
