@@ -1,0 +1,20 @@
+{
+  "title": "dsa",
+  "file_name": "dsa",
+  "description": "dsa",
+  "author": "dsa",
+  "pr_author": "sitoz",
+  "avatar_pr_author": "/avatars/default.webp",
+  "expansion": [
+    "Cataclysm"
+  ],
+  "tags": [
+    "PvE"
+  ],
+  "roles": [
+    "All"
+  ],
+  "class": [
+    "All"
+  ]
+}
