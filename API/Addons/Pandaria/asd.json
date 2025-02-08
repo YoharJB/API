@@ -1,0 +1,22 @@
+[
+  {
+    "title": "asd",
+    "file_name": "asd",
+    "description": "asd",
+    "author": "asd",
+    "pr_author": "sitoz",
+    "avatar_pr_author": "/avatars/default.webp",
+    "expansion": [
+      "Pandaria"
+    ],
+    "tags": [
+      "PvE"
+    ],
+    "roles": [
+      "All"
+    ],
+    "class": [
+      "All"
+    ]
+  }
+]
