@@ -1,0 +1,22 @@
+[
+  {
+    "title": "Ackis Recipe List",
+    "file_name": "Ackis Recipe List",
+    "description": "Ackis Recipe List",
+    "author": "Sitoz",
+    "pr_author": "sitoz",
+    "avatar_pr_author": "/avatars/default.webp",
+    "expansion": [
+      "Lichking"
+    ],
+    "tags": [
+      "PvE"
+    ],
+    "roles": [
+      "All"
+    ],
+    "class": [
+      "All"
+    ]
+  }
+]
